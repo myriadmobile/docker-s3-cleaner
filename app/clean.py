@@ -45,18 +45,19 @@ class Cleaner:
         if self._index is None:
             print 'Generating index of images...'
             self._index = dict()
-            keys = self.get_bucket().list(prefix=self._bucket_name + '/repositories/library/')
+            keys = self.get_bucket().list(prefix=self._bucket_name + '/repositories/')
             for key in keys:
                 key_base = os.path.basename(key.key)
                 if key_base.startswith('tag_'):
                     tag = key_base.replace('tag_', '', 1)
-                    repo = os.path.basename(os.path.dirname(key.key))
+                    directory = os.path.dirname(key.key)
+                    image = os.path.basename(directory)
+                    repo = os.path.basename(os.path.dirname(directory))
+                    slug = repo + '/' + image
                     image_hash = key.get_contents_as_string(encoding='utf-8')
-
-                    if repo not in self._index:
-                        self._index[repo] = dict()
-
-                    self._index[repo][tag] = image_hash
+                    if slug not in self._index:
+                        self._index[slug] = dict()
+                    self._index[slug][tag] = image_hash
         return self._index
 
     def get_tag_ancestry(self, image_hash):
@@ -76,9 +77,9 @@ class Cleaner:
                     self._keep.update(self.get_tag_ancestry(image_hash))
         return self._keep
 
-    def trim_repo_index(self, repo):
-        print 'Trimming the image index for: ' + repo + '...'
-        key = self.get_bucket().get_key(self._bucket_name + '/repositories/library/' + repo + '/_index_images')
+    def trim_repo_index(self, slug):
+        print 'Trimming the image index for: ' + slug + '...'
+        key = self.get_bucket().get_key(self._bucket_name + '/repositories/' + slug + '/_index_images')
         if key is not None:
             data = json.loads(key.get_contents_as_string(encoding='utf-8'))
             update = False
@@ -116,8 +117,8 @@ class Cleaner:
 
     def clean(self):
         # trim the orphaned images from _index_images
-        for repo in self.get_index():
-            self.trim_repo_index(repo)
+        for slug in self.get_index():
+            self.trim_repo_index(slug)
 
         # delete all the orphaned images
         total_deleted_count = 0
