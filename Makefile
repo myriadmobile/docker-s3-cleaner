@@ -1,6 +1,6 @@
 REPO = myriadmobile
 NAME = docker-s3-cleaner
-VERSION = v1.0.0
+VERSION = v1.0.1
 
 build: build-app
 

@@ -15,7 +15,7 @@ Removing images is not officially supported by Docker and variety of things can 
 ## Basic Usage
 
 ```bash
-docker run -it myriadmobile/docker-s3-cleaner:v1.0.0 \
+docker run -it myriadmobile/docker-s3-cleaner:v1.0.1 \
 	-e S3_ACCESS_KEY='replace_me' \
 	-e S3_SECRET_KEY='replace_me' \
 	-e S3_BUCKET_NAME='my_registry'
