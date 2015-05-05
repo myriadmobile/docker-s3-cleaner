@@ -1,0 +1,15 @@
+[Unit]
+Description=docker-s3-cleaner
+
+[Service]
+EnvironmentFile=/etc/environment
+TimeoutStartSec=20m
+RestartSec=5
+Restart=on-failure
+ExecStartPre=/bin/sh -c "docker history myriadmobile/docker-s3-cleaner >/dev/null || docker pull myriadmobile/docker-s3-cleaner"
+ExecStartPre=/bin/sh -c "docker inspect docker-s3-cleaner >/dev/null 2>&1 && docker rm -f docker-s3-cleaner >/dev/null 2>&1 || true"
+ExecStart=/bin/sh -c "docker run --name docker-s3-cleaner -e S3_ACCESS_KEY=$(etcdctl get /deis/store/gateway/accessKey 2>&1) -e S3_SECRET_KEY=$(etcdctl get /deis/store/gateway/secretKey 2>&1) -e S3_BUCKET_NAME=$(etcdctl get /deis/registry/bucketName 2>&1) -e S3_HOST=$(etcdctl get /deis/store/gateway/host 2>&1) -e S3_PORT=$(etcdctl get /deis/store/gateway/port 2>&1) -e S3_IS_SECURE=False myriadmobile/docker-s3-cleaner"
+ExecStopPost=-/usr/bin/docker rm -f docker-s3-cleaner
+
+[X-Fleet]
+MachineOf=deis-store-gateway@1.service
