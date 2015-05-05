@@ -10,15 +10,15 @@ Docker S3 cleaner removes orphaned image layers from S3 backed private docker re
 
 ## Warning
 
-Removing images is not officially supported by Docker and variety of things can go wrong. Use at your own risk!
+Removing images from private registries is not officially supported by Docker and a variety of things can go wrong. Use at your own risk!
 
 ## Basic Usage
 
 ```bash
 docker run -it myriadmobile/docker-s3-cleaner:v1.0.1 \
-	-e S3_ACCESS_KEY='replace_me' \
-	-e S3_SECRET_KEY='replace_me' \
-	-e S3_BUCKET_NAME='my_registry'
+	-e S3_ACCESS_KEY=replace_me \
+	-e S3_SECRET_KEY=replace_me \
+	-e S3_BUCKET_NAME=my_registry
 ```
 
 ## Configuration
@@ -30,6 +30,19 @@ docker run -it myriadmobile/docker-s3-cleaner:v1.0.1 \
 - `S3_BUCKET_NAME` - Name of the bucket containing your registry data.
 - `DRY_RUN` - When `True` all file operations are logged but not performed. default: `False`
 
+## Removing Tags
+
+The Docker S3 Cleaner will only remove layers that are no longer a part of a tagged hierarchy.
+
+### View Tags
+`curl -X GET http://REGISTRY_HOST:PORT/v1/repositories/NAMESPACE/REPO/tags`
+
+### Delete Tag
+`curl -X DELETE http://REGISTRY_HOST:PORT/v1/repositories/NAMESPACE/REPO/tags/TAG_NAME`
+
+Note: For private repositories `NAMESPACE` is normally `library`
+
 ## Contrib
 
-Check out the contrib directory for examples and os dependent configurations.
+- [CoreOS](contrib/coreos)
+- [Deis](contrib/deis)
